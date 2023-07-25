@@ -1,0 +1,7 @@
+node_modules
+dist
+out
+*.log*
+extension/**/build
+extension/**/lib/binding
+
