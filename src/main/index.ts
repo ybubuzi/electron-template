@@ -1,8 +1,9 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { installIpc } from './ipc'
+
 function createWindow(): void {
   installIpc()
   // Create the browser window.
@@ -34,12 +35,14 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  session.defaultSession.loadExtension(join(__dirname, `../../devtool`), { allowFileAccess: true })
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
