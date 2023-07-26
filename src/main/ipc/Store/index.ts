@@ -7,18 +7,27 @@
  */
 import { StoreEvents } from '@common/IpcEvent'
 import { SyncIpcCallback, IpcListener } from '../IpcBase'
+import { getStoreValue, setStoreValue } from '@main/utils/StoreUtils'
 
-const getStoreValue: SyncIpcCallback = (_, key) => {
-    console.log(`callback === `, key)
+const getValue: SyncIpcCallback = (_, key) => {
+    return getStoreValue(key)
 }
-
+const setValue: SyncIpcCallback = (_, key, value) => {
+    return setStoreValue(key, value)
+}
 export const getListeners = (): IpcListener[] => {
     const listeners: IpcListener[] = []
 
     listeners.push({
         name: StoreEvents.STORE_GET,
         mode: 'sync',
-        callback: getStoreValue
+        callback: getValue
+    })
+
+    listeners.push({
+        name: StoreEvents.STORE_SET,
+        mode: 'sync',
+        callback: setValue
     })
     return listeners
 }

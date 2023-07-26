@@ -7,5 +7,10 @@
   },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.exclude": {
+    ".edit*":true,
+    ".eslint*":true,
+    ".prettier*":true,
   }
 }

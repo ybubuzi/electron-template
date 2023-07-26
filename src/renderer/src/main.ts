@@ -1,4 +1,10 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import pinia, { initIpcStore } from './store'
 
-createApp(App).mount('#app')
+
+const app = createApp(App)
+app.use(pinia)
+app.mount('#app')
+initIpcStore()
+
