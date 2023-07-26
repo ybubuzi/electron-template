@@ -23,13 +23,15 @@
   "dependencies": {
     "@electron-toolkit/preload": "^1.0.3",
     "@electron-toolkit/utils": "^1.0.2",
-    "electron-store": "^8.1.0"
+    "electron-store": "^8.1.0",
+    "winreg": "^1.2.4"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/notarize": "^1.2.3",
     "@rushstack/eslint-patch": "^1.2.0",
     "@types/node": "16.18.11",
+    "@types/winreg": "^1.2.32",
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/eslint-config-prettier": "^7.0.0",
     "@vue/eslint-config-typescript": "^11.0.2",
