@@ -6,8 +6,6 @@
  * @Description: 用于管理和创建本地store，建立渲染进程和主进程的数据交换
  */
 import { createPinia } from 'pinia'
-import { StoreEvents } from '@common/IpcEvent'
-
 import type { Store } from 'pinia'
 
 /**
@@ -17,13 +15,13 @@ import type { Store } from 'pinia'
  */
 const loadStore = (id: string, store: Store) => {
     const storeId = id
-    window.api.invoke(StoreEvents.STORE_GET, storeId).then(data => {
+    window.service.store.getValue(storeId).then(data => {
         const localData = data ?? {}
         const webData = store.$state
         const webKeys = Object.keys(webData)
         const localKeys = Object.keys(localData)
-        if (data === undefined || localKeys.length != webKeys.length) {
-            window.api.invoke(StoreEvents.STORE_SET, storeId, JSON.parse(JSON.stringify(webData)))
+        if (!data || localKeys.length != webKeys.length) {
+            window.service.store.setValue(storeId, JSON.parse(JSON.stringify(webData)))
         } else {
             Object.keys(data).forEach(key => {
                 store[key] = data[key]
@@ -32,14 +30,17 @@ const loadStore = (id: string, store: Store) => {
         // const oldRset = store.$reset
         store.$reset = () => {
             // oldRset.call(store)
-            window.api.invoke(StoreEvents.STORE_GET, storeId).then(data => {
+            window.service.store.getValue(storeId).then(data => {
+                if (!data) {
+                    return
+                }
                 Object.keys(data).forEach(key => {
                     store[key] = data[key]
                 })
             })
         }
         store.$subscribe((_, state) => {
-            window.api.invoke(StoreEvents.STORE_SET, storeId, JSON.parse(JSON.stringify(state)))
+            window.service.store.setValue(storeId, JSON.parse(JSON.stringify(state)))
         }, { deep: true })
     })
 }

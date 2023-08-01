@@ -2,10 +2,17 @@ import { app, shell, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { installIpc } from './ipc'
+import { initBridge } from './bridge'
+import './notify'
+
+
+
+
+
+
 
 function createWindow(): void {
-  installIpc()
+  initBridge()
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,

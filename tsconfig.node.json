@@ -4,6 +4,7 @@
     "src/main/*.ts",
     "src/main/**/*.ts",
     "src/preload/*.d.ts",
+    "src/preload/*.ts",
     "src/common/**/*",
     "src/common/**/*.ts",
     "src/common/**/*.json",

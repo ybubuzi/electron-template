@@ -1,3 +1,10 @@
+/**
+ * @Name: BootstrapUtils.ts
+ * @Author: bubuzi
+ * @Date: 2023/07/26 11:18
+ * @Version: 1.0.0
+ * @Description: 程序自启动工具
+ */
 import WinReg from 'winreg'
 
 const RUN_LOCATION = '\\Software\\Microsoft\\Windows\\CurrentVersion\\Run'

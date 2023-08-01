@@ -1,5 +1,9 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
+
+
+
+
 type sendAPI = (channel: String, ...data: any) => void
 type sendSyncApi = <T>(channel: string, ...data: any) => T
 type invokeApi = (channel: string, ...data: any) => Promise<any>
@@ -17,6 +21,14 @@ type WindowApi = {
 declare global {
   interface Window {
     electron: ElectronAPI
-    api: WindowApi
+    api: WindowApi,
+    service: {
+      store: Store
+    }
   }
+}
+
+interface Store {
+  getValue<T>(key: string): Promise<T>;
+  setValue<T>(key: string, value: T): Promise<void>;
 }

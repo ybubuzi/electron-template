@@ -1,7 +1,27 @@
 import { contextBridge } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
+export type IBridgeConfig = {
+  serviceName: string
+  handelers: string[]
+}
 
+
+
+const initPreloadBridge = async () => {
+  const service = {}
+  const config: IBridgeConfig[] = await electronAPI.ipcRenderer.invoke(`build-preload-bridge`)
+  config.forEach(({ serviceName, handelers }) => {
+    service[serviceName] = {}
+    handelers.forEach(handler => {
+      const channel = `${serviceName}.${handler}`
+      service[serviceName][handler] = (...args: any) => {
+        return electronAPI.ipcRenderer.invoke("service", channel, ...args)
+      }
+    })
+  })
+  return service
+}
 
 
 // Custom APIs for renderer
@@ -14,16 +34,16 @@ const api = {
   },
   invoke: <T>(channel: string, ...data: any): Promise<T> => {
     return electronAPI.ipcRenderer.invoke(`main-sync`, channel, ...data)
-  },
+  }
 }
-
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
 if (process.contextIsolated) {
   try {
+
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
+    initPreloadBridge().then((service) => {
+      contextBridge.exposeInMainWorld('service', service)
+    })
   } catch (error) {
     console.error(error)
   }
