@@ -1,47 +1,83 @@
 import { BrowserWindow } from 'electron'
-
 export function NotifyRegister(notifyName?: string): Function {
     return function (target: unknown) {
+        const proto = Object.getPrototypeOf(target)
         // @ts-ignore
         target.prototype.notifyName! = notifyName || target.name;
+        // @ts-ignore
+        proto.notifyName! = notifyName || target.name;
     }
 }
 
 type NotifyField = {
-    type: 'success' | 'error' | 'warning' | 'info'
+    name?: string | undefined,                                  // 通知名称,window.notify.[NotifyRegister.name].[NotifyHandler.name]
+    type?: 'success' | 'error' | 'warning' | 'info' | 'data',   // 通知类型
+    is_return?: boolean                                         // 是否使用函数执行后的返回值通知渲染进程，否则将使用函数的参数通知渲染进程
 }
 
-const NotifyHandler: Function = ({ type }: NotifyField = {
-    type: 'info'
-}) => {
-    console.log('NotifyHandler', type)
+export function NotifyHandler(field: NotifyField = {
+    name: undefined,
+    type: 'info',
+    is_return: false
+}): Function {
+    const { name, type, is_return } = field
     return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-        // const oldFn = descriptor.value
+
+        const notifyName = name ?? propertyKey
+        if (!target.prototype.notify) {
+            target.prototype.notify = {}
+        }
+        const oldFn = descriptor.value
+        const mdName = name || propertyKey
+        // @ts-ignore
         descriptor.value = function (...args: any[]) {
             // @ts-ignore
             const notifyName: string = this.notifyName
-            // const res = oldFn.apply(this, args);
+
+            let sendData = args
+            if (is_return) {
+                sendData = oldFn.apply(this, args);
+            }
             BrowserWindow.getAllWindows().forEach(win => {
-                win.webContents.send('notify', `${notifyName}.${propertyKey}`, {
+                win.webContents.send('notify', `${notifyName}.${mdName}`, {
                     type,
-                    message: args
+                    message: sendData
                 })
             })
-            // return res;
             return void 0
         }
+        target.prototype.notify[notifyName] = descriptor.value
     }
 }
 
-
-@NotifyRegister()
-class Aoo {
-    @NotifyHandler()
-    seed(seed: string) {
-
-    }
+export const getNotifys = () => {
+    // @ts-ignore
+    const modules = import.meta.globEager('./**/index.ts')
+    const notifys: any[] = []
+    Object.keys(modules).forEach(path => {
+        const clazz = modules[path].default || modules[path]
+        notifys.push(clazz)
+    })
+    return notifys
 }
-const o = new Aoo()
-setInterval(() => {
-    o.seed(`你好`)
-}, 1000)
+
+export const findNotifyName = (target: unknown): string => {
+    // @ts-ignore
+    return target['notifyName']
+}
+
+export const findNotifyHandler = (target: unknown): string[] => {
+
+    const NotifyHandler: string[] = []
+    if (typeof target !== 'function') {
+        return NotifyHandler
+    }
+    const notifyName = findNotifyName(target)
+    const notifyObj = target.prototype.notify
+    for (const name of Object.keys(notifyObj)) {
+        NotifyHandler.push(name)
+        console.log(`register notify channel: ${notifyName}.${name}`)
+    }
+
+    return NotifyHandler
+}

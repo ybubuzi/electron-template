@@ -1,6 +1,7 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin, splitVendorChunkPlugin, bytecodePlugin } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
+import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 import type { UserConfig } from 'electron-vite'
 
 // @ts-ignore 忽略cf未使用检查
@@ -16,7 +17,7 @@ export default defineConfig((cfg) => {
         alias: {
           "@common": resolve("src/common"),
           "@main": resolve("src/main"),
-        }
+        },
       },
       plugins: [externalizeDepsPlugin(), bytecodePlugin()],
     },
@@ -38,6 +39,20 @@ export default defineConfig((cfg) => {
           '@renderer': resolve('src/renderer/src'),
           '@common': resolve('src/common')
         },
+      },
+      optimizeDeps: {
+        esbuildOptions: {
+          // Node.js global to browser globalThis
+          define: {
+            global: 'globalThis'
+          },
+          // Enable esbuild polyfill plugins
+          plugins: [
+            NodeGlobalsPolyfillPlugin({
+              buffer: true
+            })
+          ]
+        }
       },
       css: {
         preprocessorOptions: {

@@ -6,7 +6,6 @@
   "author": "example.com",
   "homepage": "https://www.electronjs.org",
   "scripts": {
-    "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts,.vue --fix",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
@@ -30,6 +29,7 @@
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/notarize": "^1.2.3",
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@rushstack/eslint-patch": "^1.2.0",
     "@types/node": "16.18.11",
     "@types/winreg": "^1.2.32",

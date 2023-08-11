@@ -3,12 +3,18 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { initBridge } from './bridge'
+import ErrorNotify from '@main/notify/Error'
 import './notify'
 
 
 
 
-
+// 模拟通知渲染进程
+setInterval(() => {
+  const err = new Error()
+  err.message = `main notify renderer: ${Math.random()}`
+  ErrorNotify.log(err)
+}, 1000)
 
 
 function createWindow(): void {

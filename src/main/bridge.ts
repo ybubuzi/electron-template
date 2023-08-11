@@ -1,6 +1,7 @@
 import { ipcMain } from "electron"
 import { getServices, findServiceName, findServiceHandler } from "./services"
-import { IBridgeConfig } from '../preload'
+import { getNotifys, findNotifyName, findNotifyHandler } from './notify'
+import { Bridge } from '@common/@types'
 
 let enbaleBridge = false
 const ioc = new Map<string, any>()
@@ -10,6 +11,15 @@ const listeners = new Map<string, Function>()
 export const initBridge = () => {
     if (enbaleBridge) return
     enbaleBridge = true
+    const notifyMap = {}
+    const notifys = getNotifys()
+    notifys.forEach(notify => {
+        const name = findNotifyName(notify)
+        const handlers = findNotifyHandler(notify)
+        notifyMap[name] = handlers
+    })
+
+
     const services = getServices()
     services.forEach(service => {
         const name = findServiceName(service)
@@ -21,12 +31,17 @@ export const initBridge = () => {
         }
         handlers.forEach(handler => {
             const channel = `${name}.${handler}`
-            console.log(`channel: ${channel}`)
-            listeners.set(channel, instance[handler])
+            console.log(`register service channel: ${channel}`)
+            if (instance[handler]) {
+                listeners.set(channel, instance[handler])
+            } else {
+                // 静态方法
+                listeners.set(channel, instance.__proto__.constructor[handler])
+            }
         })
     })
     ipcMain.handle(`build-preload-bridge`, async () => {
-        const config: IBridgeConfig[] = []
+        const config: Bridge.Service[] = []
         services.forEach(service => {
             const name = findServiceName(service)
             const handlers = findServiceHandler(service)
@@ -36,6 +51,9 @@ export const initBridge = () => {
             })
         })
         return config
+    })
+    ipcMain.handle(`build-preload-notify`, async () => {
+        return notifyMap
     })
     ipcMain.handle(`service`, async (event, channel, ...args) => {
         const method = listeners.get(channel)

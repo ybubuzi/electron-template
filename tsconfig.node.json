@@ -12,6 +12,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "composite": true,
+    "declaration": true,
     "types": ["electron-vite/node"],
     "allowJs": true,
     "paths": {
