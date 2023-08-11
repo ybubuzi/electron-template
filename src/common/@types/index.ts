@@ -26,6 +26,11 @@ export namespace Preload {
     export interface Notify {
         error: ErrorNotify
     }
+    export interface NotifyField {
+        name?: string | undefined,  // 通知名称,window.notify.[NotifyRegister.name].[NotifyHandler.name]
+        type?: 'success' | 'error' | 'warning' | 'info' | 'data',// 通知类型
+        is_return?: boolean // 是否使用函数执行后的返回值通知渲染进程，否则将使用函数的参数通知渲染进程
+    }
     export interface ErrorNotify {
         log(cb: (event: NotifyEvent) => unknown): void
     }

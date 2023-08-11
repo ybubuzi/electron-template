@@ -1,21 +1,17 @@
 import { BrowserWindow } from 'electron'
+import { Preload } from '@common/@types'
 export function NotifyRegister(notifyName?: string): Function {
     return function (target: unknown) {
-        const proto = Object.getPrototypeOf(target)
         // @ts-ignore
         target.prototype.notifyName! = notifyName || target.name;
+
         // @ts-ignore
-        proto.notifyName! = notifyName || target.name;
+        target.notifyName = notifyName || target.name;
     }
 }
 
-type NotifyField = {
-    name?: string | undefined,                                  // 通知名称,window.notify.[NotifyRegister.name].[NotifyHandler.name]
-    type?: 'success' | 'error' | 'warning' | 'info' | 'data',   // 通知类型
-    is_return?: boolean                                         // 是否使用函数执行后的返回值通知渲染进程，否则将使用函数的参数通知渲染进程
-}
 
-export function NotifyHandler(field: NotifyField = {
+export function NotifyHandler(field: Preload.NotifyField = {
     name: undefined,
     type: 'info',
     is_return: false
@@ -49,7 +45,6 @@ export function NotifyHandler(field: NotifyField = {
         target.prototype.notify[notifyName] = descriptor.value
     }
 }
-
 export const getNotifys = () => {
     // @ts-ignore
     const modules = import.meta.globEager('./**/index.ts')
@@ -60,6 +55,7 @@ export const getNotifys = () => {
     })
     return notifys
 }
+
 
 export const findNotifyName = (target: unknown): string => {
     // @ts-ignore
@@ -78,6 +74,5 @@ export const findNotifyHandler = (target: unknown): string[] => {
         NotifyHandler.push(name)
         console.log(`register notify channel: ${notifyName}.${name}`)
     }
-
     return NotifyHandler
 }
