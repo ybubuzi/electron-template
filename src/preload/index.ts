@@ -1,10 +1,21 @@
+/**
+ * @Name: Preload/index
+ * @Author: bubuzi
+ * @Date: 2023/08/15 11:49
+ * @Version: 1.0.0
+ * @Description: 用于渲染进程的预加载脚本，连接渲染进程和主进程
+ */
 import { contextBridge, ipcMain } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { Bridge } from '@common/@types'
 
 
-
+// 用于存储notify的回调函数
 const notifyCbMap = new Map<string, Function>()
+
+/** 
+ * 用于初始换preload的bridge，完成ipc注册，挂载至window对象以便直接调用
+ */
 const initPreloadBridge = async () => {
   const service = {}
   const config: Bridge.Service[] = await electronAPI.ipcRenderer.invoke(`build-preload-bridge`)
@@ -33,6 +44,10 @@ const initPreloadBridge = async () => {
   return service
 }
 
+/**
+ * 用于初始化preload的notify，完成ipc注册，挂载至window对象
+ * 使用前注册回调函数，当接收到主进程通知时将自动回调
+ */
 const initPreloadNotify = async () => {
   const notify = {}
   const notifyMap = await electronAPI.ipcRenderer.invoke(`build-preload-notify`)
@@ -56,7 +71,10 @@ const initPreloadNotify = async () => {
   })
   return notify
 }
-// Custom APIs for renderer
+
+/**
+ * 遗留的开放ipc调用通道，后续删除
+ */
 const api = {
   send: (channel: string, ...data: any) => {
     electronAPI.ipcRenderer.send(`main-async`, channel, ...data)
@@ -68,10 +86,10 @@ const api = {
     return electronAPI.ipcRenderer.invoke(`main-sync`, channel, ...data)
   }
 }
-// const notify = 
+
 if (process.contextIsolated) {
   try {
-
+    // 挂载对象至window对象
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
     initPreloadBridge().then((service) => {

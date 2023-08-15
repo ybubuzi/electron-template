@@ -1,5 +1,18 @@
+/**
+ * @Name: Notify/index.ts
+ * @Author: bubuzi
+ * @Date: 2023/08/15 11:53
+ * @Version: 1.0.0
+ * @Description: 用于通知主进程的装饰器
+ */
 import { BrowserWindow } from 'electron'
 import { Preload } from '@common/@types'
+
+/**
+ * 类装饰器，用于注册通知名称
+ * @param notifyName 通知通道名
+ * @returns 
+ */
 export function NotifyRegister(notifyName?: string): Function {
     return function (target: unknown) {
         // @ts-ignore
@@ -11,6 +24,14 @@ export function NotifyRegister(notifyName?: string): Function {
 }
 
 
+/**
+ * 方法装饰器，用于通知渲染进程具体的通知
+ * @param {Preload.NotifyField} field 通知字段
+ * @param {string} field.name 通知名称
+ * @param {string} field.type 通知类型
+ * @param {boolean} field.is_return 是否返回值 
+ * @returns 
+ */
 export function NotifyHandler(field: Preload.NotifyField = {
     name: undefined,
     type: 'info',
@@ -45,6 +66,11 @@ export function NotifyHandler(field: Preload.NotifyField = {
         target.prototype.notify[notifyName] = descriptor.value
     }
 }
+
+/**
+ * 获取所有的通知服务名
+ * @returns {Array<Function>}
+ */
 export const getNotifys = () => {
     // @ts-ignore
     const modules = import.meta.globEager('./**/index.ts')
@@ -56,12 +82,20 @@ export const getNotifys = () => {
     return notifys
 }
 
-
+/**
+ * 获取对应通知的服务名称
+ * @param {Object} target  通知服务原型对象
+ * @returns {String} 服务名称
+ */
 export const findNotifyName = (target: unknown): string => {
     // @ts-ignore
     return target['notifyName']
 }
-
+/**
+ * 获取对应通知的所有通知方法
+ * @param {Object} target  通知服务原型对象
+ * @returns {Array<String>} 通知方法名集合
+ */
 export const findNotifyHandler = (target: unknown): string[] => {
 
     const NotifyHandler: string[] = []

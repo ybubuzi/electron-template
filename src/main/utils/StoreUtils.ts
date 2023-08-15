@@ -21,7 +21,7 @@ const prepareKey = (key: string) => {
     }
     return `${PREFIX}${key}`
 }
-export const getStoreValue = <T>(key: string): Partial<T> | undefined => {
+export const getStoreValue = <T>(key: string): Partial<T> | null => {
     return STORE.get(prepareKey(key), undefined) as Partial<T>
 }
 export const setStoreValue = (key: string, value: object) => {
