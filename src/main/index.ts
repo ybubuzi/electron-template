@@ -16,6 +16,16 @@ setInterval(() => {
   ErrorNotify.log(err)
 }, 1000)
 
+/**
+ * 屏蔽electron底层的一些警告,如GPU相关的警告
+ * LOGGING_INFO = 0;
+ * LOGGING_WARNING = 1;
+ * LOGGING_ERROR = 2;
+ * LOGGING_FATAL = 3;
+ * LOGGING_NUM_SEVERITIES = 4;
+*/
+app.commandLine.appendSwitch('log-level', '3')
+
 
 function createWindow(): void {
   initBridge()
