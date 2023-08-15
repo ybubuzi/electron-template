@@ -4,7 +4,7 @@ const fs = require('fs');
 const getGitVersion = async (envObj) => {
     const buffer = execSync(`git rev-parse HEAD`);
     const rawText = fs.readFileSync('build/.env', 'utf8');
-    envObj.RENDERER_COMMIT_VER = buffer.toString()
+    envObj.RENDERER_COMMIT_VER = buffer.toString().toUpperCase()
 }
 
 
@@ -52,14 +52,20 @@ const writeEnv = (path, envObj) => {
     console.log(lines)
     fs.writeFileSync(path, lines.filter(item => item !== '').join('\n'), 'utf8')
 }
+
 const main = async () => {
+    const yaml = require('js-yaml');
+    const yamlStr = fs.readFileSync('electron-builder.yml').toString();
+    const buildConfig = yaml.load(yamlStr)
     const exists = fs.existsSync('build/.env')
-    if(!exists){
+    if (!exists) {
         fs.openSync('build/.env', 'a')
     }
     const envObj = parseEnv('build/.env')
     const packageObj = JSON.parse(fs.readFileSync('package.json', 'utf8'))
     envObj.RENDERER_VERSION = packageObj.version
+    envObj.APP_ID = buildConfig.appId
+    envObj.APP_NAME = buildConfig.productName
     await getGitVersion(envObj)
     await getBuildDate(envObj)
     writeEnv('build/.env', envObj)

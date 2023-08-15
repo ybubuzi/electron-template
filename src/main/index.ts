@@ -31,6 +31,8 @@ function createWindow(): void {
   initBridge()
   // Create the browser window.
   const mainWindow = new BrowserWindow({
+    // @ts-ignore 读取electron-builder.yml中的产品名称，具体请看文件：build/build.js
+    title: import.meta.env.APP_NAME,
     width: 900,
     height: 670,
     show: false,
@@ -43,6 +45,8 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
+    // @ts-ignore
+    mainWindow.setTitle(import.meta.env.APP_NAME)
     mainWindow.show()
   })
 
@@ -61,10 +65,10 @@ function createWindow(): void {
 
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // @ts-ignore 注册程序id
+  electronApp.setAppUserModelId(import.meta.env.APP_ID)
+
   session.defaultSession.loadExtension(join(__dirname, `../../devtool`), { allowFileAccess: true })
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
