@@ -5,7 +5,7 @@
  * @Version: 1.0.0
  * @Description: 用于渲染进程的预加载脚本，连接渲染进程和主进程
  */
-import { contextBridge, ipcMain } from 'electron'
+import { contextBridge } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { Bridge } from '@common/@types'
 
@@ -63,7 +63,7 @@ const initPreloadNotify = async () => {
       }
     })
   })
-  electronAPI.ipcRenderer.on(`notify`, (event, channel, ...args) => {
+  electronAPI.ipcRenderer.on(`notify`, (_, channel, ...args) => {
     const cb = notifyCbMap.get(channel)
     if (cb) {
       cb(...args)

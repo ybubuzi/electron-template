@@ -55,7 +55,7 @@ export const initBridge = () => {
     ipcMain.handle(`build-preload-notify`, async () => {
         return notifyMap
     })
-    ipcMain.handle(`service`, async (event, channel, ...args) => {
+    ipcMain.handle(`service`, async (_, channel, ...args) => {
         const method = listeners.get(channel)
         if (!method) {
             return

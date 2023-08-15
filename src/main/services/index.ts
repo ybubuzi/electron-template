@@ -11,7 +11,7 @@ export function ServiceRegister(serviceName?: string): Function {
 }
 
 export function ServiceHandler(): Function {
-    return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
+    return function (_: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
         descriptor.value.serviceHandlerName = propertyKey
         descriptor.value.isServiceHandler = true
         // @ts-ignore
