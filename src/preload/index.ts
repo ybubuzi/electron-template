@@ -26,8 +26,13 @@ const initPreloadBridge = async () => {
       service[serviceName][handler] = (...args: any) => {
         return new Promise(async (resolve, reject) => {
           try {
-            const rev = await electronAPI.ipcRenderer.invoke("service", channel, ...args)
-            resolve(rev)
+            const [err, rev] = await electronAPI.ipcRenderer.invoke("service", channel, ...args)
+            if (err) {
+              reject(err)
+            } else {
+              resolve(rev)
+            }
+
           } catch (error) {
             if (error instanceof Error) {
               const m = error.message.match(/:\s?/)
@@ -72,32 +77,18 @@ const initPreloadNotify = async () => {
   return notify
 }
 
-/**
- * 遗留的开放ipc调用通道，后续删除
- */
-const api = {
-  send: (channel: string, ...data: any) => {
-    electronAPI.ipcRenderer.send(`main-async`, channel, ...data)
-  },
-  sendSync: <T>(channel: string, ...data: any): T => {
-    return electronAPI.ipcRenderer.sendSync(`main-async`, channel, ...data)
-  },
-  invoke: <T>(channel: string, ...data: any): Promise<T> => {
-    return electronAPI.ipcRenderer.invoke(`main-sync`, channel, ...data)
-  }
-}
+
 
 if (process.contextIsolated) {
   try {
     // 挂载对象至window对象
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
     initPreloadBridge().then((service) => {
       contextBridge.exposeInMainWorld('service', service)
     })
     initPreloadNotify().then((notify) => {
       contextBridge.exposeInMainWorld('notify', notify)
     })
+    contextBridge.exposeInMainWorld('electron', electronAPI)
   } catch (error) {
     console.error(error)
   }

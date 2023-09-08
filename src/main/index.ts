@@ -1,20 +1,14 @@
-import { app, shell, BrowserWindow, session } from 'electron'
+import { app, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 import { initBridge } from './bridge'
 import ErrorNotify from '@main/notify/Error'
-import './notify'
+import { createMainWindow } from './window/MainWindow'
+import { initStore } from '@main/utils/StoreUtils'
+import { updateAppPath } from './utils/ApplicationUtils'
 
 
 
-
-// 模拟通知渲染进程
-setInterval(() => {
-  const err = new Error()
-  err.message = `main notify renderer: ${Math.random()}`
-  ErrorNotify.log(err)
-}, 1000)
 
 /**
  * 屏蔽electron底层的一些警告,如GPU相关的警告
@@ -25,48 +19,29 @@ setInterval(() => {
  * LOGGING_NUM_SEVERITIES = 4;
 */
 app.commandLine.appendSwitch('log-level', '3')
+updateAppPath()
 
-
-function createWindow(): void {
-  initBridge()
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    // @ts-ignore 读取electron-builder.yml中的产品名称，具体请看文件：build/build.js
-    title: import.meta.env.APP_NAME,
-    width: 900,
-    height: 670,
-    show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+app.whenReady().then(async () => {
+  // 初始化持久化数据
+  await initStore()
+  process.on('uncaughtException', function (error) {
+    // Handle the error
+    ErrorNotify.log(error)
+  })
+  process.on('unhandledRejection', function (error) {
+    if (error instanceof Error) {
+      // Handle the error
+      ErrorNotify.log(error)
     }
   })
-
-  mainWindow.on('ready-to-show', () => {
-    // @ts-ignore
-    mainWindow.setTitle(import.meta.env.APP_NAME)
-    mainWindow.show()
-  })
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+  // 判断是否二次打开
+  if (!app.requestSingleInstanceLock()) {
+    // 创建新主窗口
+    createMainWindow()
+    return
   }
-
-}
-
-app.whenReady().then(() => {
-
+  // 初始化主/渲进程的连接通道
+  initBridge()
   // 开发环境下加载VUE devtool
   if (is.dev) {
     session.defaultSession.loadExtension(join(__dirname, `../../devtool`), { allowFileAccess: true })
@@ -76,29 +51,18 @@ app.whenReady().then(() => {
     // 注册运行程序
     app.setAppUserModelId(process.execPath)
   }
-
   // 用于屏蔽F12与`Ctrl+Shift+I`快捷键打开开发者工具
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
+  createMainWindow()
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+
 app.on('window-all-closed', () => {
+  // MAC设备时处理
   if (process.platform !== 'darwin') {
     app.quit()
   }
-})
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
+}) 

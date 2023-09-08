@@ -1,6 +1,6 @@
 
 /**
- * @Name: Notify/ErrorAdvice
+ * @Name: Notify/ErrorNotify
  * @Author: bubuzi
  * @Date: 2023/08/15 12:01
  * @Version: 1.0.0
@@ -12,7 +12,7 @@ import { NotifyRegister, NotifyHandler } from '..'
  * 错误通知
  */
 @NotifyRegister('error')
-export default class ErrorAdvice {
+export default class ErrorNotify {
 
     /**
      * 日志通知
@@ -23,9 +23,12 @@ export default class ErrorAdvice {
         is_return: true,    // 这里如果为false，将直接把err整个对象发送至渲染进程
         type: 'error'
     })
-    static log(err: Error) {
-        if (err) {
+    static log(err: Error | string | unknown) {
+        if (err instanceof Error) {
             return err.message
+        }
+        if (typeof err === 'string') {
+            return err
         }
         return 'main error'
     }

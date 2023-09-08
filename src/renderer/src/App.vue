@@ -11,12 +11,7 @@ window.notify.error.log((event) => {
   }
 })
 
-// 渲染进程通过ipc调用主进程函数
-setInterval(() => {
-  window.service.random.randomNum().then((res) => {
-    console.log(`render call main`, res)
-  })
-}, 1000)
+
 
 </script>
 

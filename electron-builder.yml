@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: my-app
+appId: cc.bubuzi.electron
+productName: electron-template
 directories:
   buildResources: build
 files:
@@ -12,31 +12,55 @@ files:
 asarUnpack:
   - resources/*
 afterSign: build/notarize.js
+afterPack: build/afterPack.js
 win:
-  executableName: my-app
+  executableName: ${productName}
 nsis:
+ # 是否一键安装
+  oneClick: false 
+  # 指定安装程序是否允许请求管理员权限
+  # allowElevation: true
+  # 指定安装程序时的语言
+  # installerLanguages:
+  #   - 'en_US'
+  # 指定安装程序图标
+  # installerIcon: build/icon.ico
+  # 指定卸载程序图标
+  # uninstallerIcon: build/icon.ico
+  # 指定安装程序窗口图标
+  # installerHeaderIcon: build/icon.ico 
+  # 指定打包结果文件名
   artifactName: ${name}-${version}-setup.${ext}
+  # 指定应用程序快捷方式名称
   shortcutName: ${productName}
+  #指定卸载程序的显示名称
   uninstallDisplayName: ${productName}
+  # 指定是否在 windows“开始”菜单中创建快捷方式
+  createStartMenuShortcut: true 
+  # 指定是否在 windows 桌面上创建快捷方式
   createDesktopShortcut: always
-mac:
-  entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-dmg:
-  artifactName: ${name}-${version}.${ext}
-linux:
-  target:
-    - AppImage
-    - snap
-    - deb
-  maintainer: electronjs.org
-  category: Utility
+  # 指定安装程序是否允许用户更改安装目标路径
+  allowToChangeInstallationDirectory: true 
+  # 指定是否在安装完成后启动应用程序
+  runAfterFinish: true
+# mac:
+#   entitlementsInherit: build/entitlements.mac.plist
+#   extendInfo:
+#     - NSCameraUsageDescription: Application requests access to the device's camera.
+#     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+#     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+#     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+# dmg:
+#   artifactName: ${name}-${version}.${ext}
+# linux:
+#   target:
+#     - AppImage
+#     - snap
+#     - deb
+#   maintainer: electronjs.org
+#   category: Utility
 appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${productName}-${version}.${ext}
 npmRebuild: false
 publish:
   provider: generic

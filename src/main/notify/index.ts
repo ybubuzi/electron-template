@@ -7,7 +7,7 @@
  */
 import { BrowserWindow } from 'electron'
 import { Preload } from '@common/@types'
-
+import log from 'electron-log'
 /**
  * 类装饰器，用于注册通知名称
  * @param notifyName 通知通道名
@@ -106,7 +106,7 @@ export const findNotifyHandler = (target: unknown): string[] => {
     const notifyObj = target.prototype.notify
     for (const name of Object.keys(notifyObj)) {
         NotifyHandler.push(name)
-        console.log(`register notify channel: ${notifyName}.${name}`)
+        log.info(`Register Notify Channel: ${notifyName}.${name}`)
     }
     return NotifyHandler
 }
