@@ -17,16 +17,9 @@ const loadStore = (id: string, store: Store) => {
     const storeId = id
     window.service.store.getValue(storeId).then(data => {
         const localData = data ?? {}
-        const webData = store.$state
-        const webKeys = Object.keys(webData)
-        const localKeys = Object.keys(localData)
-        if (!data || localKeys.length != webKeys.length) {
-            window.service.store.setValue(storeId, JSON.parse(JSON.stringify(webData)))
-        } else {
-            Object.keys(data).forEach(key => {
-                store[key] = data[key]
-            })
-        }
+        Object.keys(localData).forEach(key => {
+            store[key] = localData[key]
+        })
         // const oldRset = store.$reset
         store.$reset = () => {
             // oldRset.call(store)

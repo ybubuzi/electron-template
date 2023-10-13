@@ -15,14 +15,17 @@ import { getStoreValue, setStoreValue } from '@main/utils/StoreUtils'
  */
 @ServiceRegister("store")
 export default class StoreService {
+    getValue<T>(key: string);
+    getValue<T>(group: string, key: string);
     /**
      * 通过指定key获取持久化的值
      * @param {String} key 指定的key
      * @returns {Object|null} 返回对应的值
      */
     @ServiceHandler()
-    getValue<T>(key: string): Partial<T> | null {
-        return getStoreValue(key)
+    getValue<T>(...args: any[]): Partial<T> | null {
+        // @ts-ignore
+        return getStoreValue(...args)
     }
     /**
      * 通过指定key设置持久化的值

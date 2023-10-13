@@ -100,8 +100,11 @@ export namespace Preload {
         window: WindowService
     }
     export interface StoreService {
+
         getValue<T>(key: string): Promise<T>;
+        getValue<T>(group: string, key: string): Promise<T>;
         setValue<T>(key: string, value: T): Promise<void>;
+        setValue<T>(group: string, key: string, value: T): Promise<void>;
     }
     export interface WindowService {
         refresh(windowId?: number): Promise<void>;
