@@ -6,7 +6,7 @@ import ErrorNotify from '@main/notify/Error'
 import { createMainWindow } from './window/MainWindow'
 import { initStore } from '@main/utils/StoreUtils'
 import { updateAppPath } from './utils/ApplicationUtils'
-
+import { initLog } from '@main/utils/LogUtils'
 
 
 
@@ -19,9 +19,14 @@ import { updateAppPath } from './utils/ApplicationUtils'
  * LOGGING_NUM_SEVERITIES = 4;
 */
 app.commandLine.appendSwitch('log-level', '3')
+// app.commandLine.appendSwitch('trace-warnings');
+// electron日志
+// app.commandLine.appendSwitch('enable-logging')
 updateAppPath()
 
 app.whenReady().then(async () => {
+  // 初始化日志打印
+  initLog()
   // 初始化持久化数据
   await initStore()
   process.on('uncaughtException', function (error) {
